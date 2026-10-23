@@ -1,7 +1,7 @@
 // เก็บหน้าตัวแอปและไอคอนไว้ในเครื่อง ให้เปิดแอปได้เร็ว (ข้อมูลจริงยังมาจาก Google Sheets ทุกครั้ง)
-const CACHE = 'room-booking-v1';
+const CACHE = 'room-booking-v2';
 const SHELL = ['./', './index.html', './config.js', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
+  './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));

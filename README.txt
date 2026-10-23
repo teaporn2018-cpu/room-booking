@@ -17,7 +17,7 @@
    - Repository name: room-booking   (ภาษาอังกฤษ)
    - เลือก Public  แล้วกด Create repository
 3) กดลิงก์ "uploading an existing file"
-   ลากไฟล์ทั้งหมดในโฟลเดอร์นี้ (index.html, config.js, manifest.webmanifest, sw.js และโฟลเดอร์ icons)
+   ลากไฟล์ทั้งหมดในโฟลเดอร์นี้ (ทุกไฟล์ รวมรูป .png ทั้ง 5 ไฟล์)
    ไปวาง แล้วกด Commit changes
 4) ไปที่ Settings > Pages
    - Source: Deploy from a branch
