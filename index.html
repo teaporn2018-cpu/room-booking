@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ระบบจองห้องพัก</title>
+<meta name="theme-color" content="#1e3a5f">
+<meta name="description" content="ระบบจองห้องพัก โรงแรมอะพาร์ทเมนต์ / แมนชั่น">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="จองห้องพัก">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #1e3a5f; --navy2: #2f5d8a; --gold: #fbbf24; --txt: #1f2933; --mut: #6b7785; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--navy); font-family: 'Sarabun', sans-serif; color: var(--txt); overflow: hidden; }
+  #app { position: fixed; top: env(safe-area-inset-top); left: 0; right: 0; bottom: 0; width: 100%; height: calc(100% - env(safe-area-inset-top)); border: 0; background: #f3f5f8; display: none; }
+  .screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 16px; text-align: center; color: #fff;
+    background: linear-gradient(160deg, #0b1f3a, #1e3a5f 55%, #2f6f9e); }
+  .screen img { width: 112px; height: 112px; border-radius: 26px; box-shadow: 0 10px 30px #0006; }
+  .screen h1 { font-size: 22px; margin: 18px 0 4px; }
+  .screen p { margin: 4px 0; color: #cfe0f3; font-size: 14px; }
+  .dots { margin-top: 18px; display: flex; gap: 6px; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); animation: b 1s infinite ease-in-out; }
+  .dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
+  @keyframes b { 0%, 80%, 100% { opacity: .25; transform: scale(.8); } 40% { opacity: 1; transform: scale(1); } }
+  .card { background: #fff; color: var(--txt); border-radius: 14px; padding: 18px; width: 100%; max-width: 420px; text-align: left; margin-top: 18px; }
+  .card label { font-size: 13px; color: var(--mut); }
+  .card input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid #dde3ea; border-radius: 8px; margin-top: 6px; }
+  .card button { width: 100%; margin-top: 14px; font: inherit; font-weight: 600; padding: 11px; border: 0; border-radius: 8px; background: var(--navy2); color: #fff; }
+  .err { color: #dc2626; font-size: 13px; min-height: 18px; margin-top: 8px; }
+  .hint { font-size: 12px; color: var(--mut); margin-top: 10px; line-height: 1.5; }
+  .hidden { display: none !important; }
+  #install { position: fixed; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 5; display: flex; gap: 6px; align-items: center;
+    background: var(--gold); color: var(--navy); font: inherit; font-weight: 700; border: 0; border-radius: 24px; padding: 10px 16px; box-shadow: 0 6px 18px #0005; }
+  #install span { font-weight: 400; opacity: .7; padding-left: 6px; }
+  #ios { position: fixed; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 5; background: #fff; color: var(--txt);
+    border-radius: 12px; padding: 12px 40px 12px 14px; font-size: 14px; box-shadow: 0 6px 20px #0006; line-height: 1.5; }
+  #ios b { color: var(--navy); }
+  #ios button { position: absolute; top: 6px; right: 6px; border: 0; background: none; font-size: 20px; color: var(--mut); }
+</style>
+</head>
+<body>
+
+<div id="splash" class="screen">
+  <img src="icons/icon-512.png" alt="">
+  <h1 id="splashName">ระบบจองห้องพัก</h1>
+  <p>โรงแรมอะพาร์ทเมนต์ / แมนชั่น</p>
+  <div class="dots"><i></i><i></i><i></i></div>
+  <p id="splashMsg" style="margin-top:14px;font-size:13px"></p>
+</div>
+
+<div id="setup" class="screen hidden">
+  <img src="icons/icon-512.png" alt="">
+  <h1>ตั้งค่าแอปครั้งแรก</h1>
+  <p>วางลิงก์เว็บแอปของระบบจองห้องพัก</p>
+  <div class="card">
+    <label>ลิงก์เว็บแอป (ลงท้ายด้วย /exec)</label>
+    <input id="urlInput" type="url" inputmode="url" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off">
+    <div class="err" id="urlErr"></div>
+    <button id="saveUrl" type="button">บันทึกและเปิดระบบ</button>
+    <div class="hint">หาลิงก์ได้จาก Apps Script &gt; ทำให้ใช้งานได้ &gt; จัดการการทำให้ใช้งานได้ &gt; URL ของเว็บแอป<br>
+      ตั้งครั้งเดียว เครื่องนี้จะจำไว้ (เปลี่ยนลิงก์ได้โดยเปิดแอปแล้วเติม ?setup ท้ายลิงก์)</div>
+  </div>
+</div>
+
+<iframe id="app" title="ระบบจองห้องพัก" allow="clipboard-write"></iframe>
+
+<button id="install" class="hidden" type="button">⬇ ติดตั้งแอป<span id="installX">✕</span></button>
+<div id="ios" class="hidden">ติดตั้งเป็นแอป: แตะปุ่ม <b>แชร์ ⬆️</b> ด้านล่าง แล้วเลือก <b>"เพิ่มไปยังหน้าจอโฮม"</b><button type="button" id="iosX" aria-label="ปิด">✕</button></div>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const URL_RE = /^https:\/\/script\.google\.com\/.+\/exec(\?.*)?$/;
+  const get = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const set = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { } };
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+
+  if (window.APP_NAME) { $('splashName').textContent = window.APP_NAME; document.title = window.APP_NAME; }
+
+  const params = new URLSearchParams(location.search);
+  if (params.has('url') && URL_RE.test(params.get('url'))) set('appUrl', params.get('url'));
+  const forceSetup = params.has('setup');
+  const appUrl = (!forceSetup && (String(window.APP_URL || '').trim() || get('appUrl'))) || '';
+
+  function openApp(url) {
+    $('setup').classList.add('hidden');
+    $('splash').classList.remove('hidden');
+    if (!navigator.onLine) { $('splashMsg').textContent = 'ไม่มีอินเทอร์เน็ต กรุณาเชื่อมต่อแล้วเปิดแอปใหม่'; }
+    const f = $('app');
+    const slow = setTimeout(() => { $('splashMsg').textContent = 'กำลังเชื่อมต่อเซิร์ฟเวอร์... (ถ้ารอนานให้ตรวจอินเทอร์เน็ต)'; }, 9000);
+    f.onload = () => {
+      clearTimeout(slow);
+      f.style.display = 'block';
+      setTimeout(() => $('splash').classList.add('hidden'), 250);
+    };
+    f.src = url;
+  }
+
+  function showSetup() {
+    $('splash').classList.add('hidden');
+    $('setup').classList.remove('hidden');
+    $('urlInput').value = get('appUrl') || '';
+  }
+  $('saveUrl').onclick = () => {
+    const u = $('urlInput').value.trim();
+    if (!URL_RE.test(u)) { $('urlErr').textContent = 'ลิงก์ต้องขึ้นต้นด้วย https://script.google.com/ และลงท้ายด้วย /exec'; return; }
+    set('appUrl', u);
+    if (forceSetup) history.replaceState(null, '', location.pathname);
+    openApp(u);
+  };
+
+  if (appUrl) openApp(appUrl); else showSetup();
+
+  // ปุ่มติดตั้ง (Android / คอมพิวเตอร์)
+  let deferred = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); deferred = e;
+    if (get('hideInstall') !== '1') $('install').classList.remove('hidden');
+  });
+  $('install').onclick = async ev => {
+    if (ev.target.id === 'installX') { set('hideInstall', '1'); $('install').classList.add('hidden'); return; }
+    if (!deferred) return;
+    deferred.prompt();
+    await deferred.userChoice.catch(() => {});
+    deferred = null; $('install').classList.add('hidden');
+  };
+  window.addEventListener('appinstalled', () => $('install').classList.add('hidden'));
+
+  // คำแนะนำ iPhone / iPad (Safari ไม่มีปุ่มติดตั้งอัตโนมัติ)
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (ios && !standalone && get('hideIos') !== '1') setTimeout(() => $('ios').classList.remove('hidden'), 2500);
+  $('iosX').onclick = () => { set('hideIos', '1'); $('ios').classList.add('hidden'); };
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  }
+})();
+</script>
+</body>
+</html>
